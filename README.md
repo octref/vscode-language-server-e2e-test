@@ -1,3 +1,3 @@
-# VS Code Language Server Template
+# VS Code Language Server E2E Test Template
 
-A cleaner template for writing VS Code language server.
+Template for E2E testing language server.
