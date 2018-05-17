@@ -8,10 +8,7 @@
     "sourceMap": true
   },
   "include": [
-    "client"
-  ],
-  "exclude": [
-    "node_modules",
-    "server"
+    "client",
+    "test"
   ]
 }

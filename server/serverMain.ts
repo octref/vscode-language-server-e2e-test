@@ -8,8 +8,11 @@ import {
   TextDocumentPositionParams,
   CompletionItem,
   CompletionItemKind,
-  TextDocumentSyncKind
+  TextDocumentSyncKind,
+  TextEdit
 } from 'vscode-languageserver'
+
+import { Range, Position } from 'vscode-languageserver-types'
 
 const connection: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process))
 const documents: TextDocuments = new TextDocuments()
@@ -18,51 +21,22 @@ documents.listen(connection)
 connection.onInitialize((params): InitializeResult => {
   return {
     capabilities: {
-      textDocumentSync: TextDocumentSyncKind.Incremental,
-      completionProvider: {
-        resolveProvider: true
-      }
+      textDocumentSync: TextDocumentSyncKind.Full,
+      documentFormattingProvider: true
     }
   }
 })
 
-documents.onDidChangeContent(change => {
-  console.log('didChangeContent')
-})
-
-connection.onDidChangeWatchedFiles(change => {
-  console.log('didChangeWatchedFiles')
-})
-
-connection.onCompletion((position: TextDocumentPositionParams): CompletionItem[] => {
-  return [
-    {
-      label: 'TypeScript',
-      kind: CompletionItemKind.Text,
-      data: 1
-    },
-    {
-      label: 'JavaScript',
-      kind: CompletionItemKind.Text,
-      data: 2
-    }
-  ]
-})
-
-connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
-  if (item.data === 1) {
-    item.detail = 'TypeScript details'
-    item.documentation = 'TypeScript documentation'
-  } else if (item.data === 2) {
-    item.detail = 'JavaScript details'
-    item.documentation = 'JavaScript documentation'
-  }
-  return item
-})
-
-connection.onDidChangeTextDocument(params => {
-  console.log(`${params.textDocument.uri} changeddd`)
-  console.log(`${JSON.stringify(params.contentChanges, null, 2)}`)
+connection.onDocumentFormatting(params => {
+  console.log('Formatting')
+  const fullDocument = documents.get(params.textDocument.uri)
+  const firstCharRange = Range.create(
+    // fullDocument.positionAt(0),
+    // fullDocument.positionAt(1)
+    Position.create(0, 0),
+    Position.create(0, 1)
+  );
+  return [TextEdit.del(firstCharRange)]
 })
 
 connection.listen()

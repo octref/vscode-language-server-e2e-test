@@ -1,15 +1,22 @@
 import * as path from 'path'
 
-import { ExtensionContext } from 'vscode'
-import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } from 'vscode-languageclient'
+import { ExtensionContext, TextDocument as VTextDocument } from 'vscode'
+import * as vscode from 'vscode'
+import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind, Middleware } from 'vscode-languageclient'
 
 export function activate(context: ExtensionContext) {
-  const serverModule = context.asAbsolutePath(path.join('server', 'dist', 'serverMain.js'))
+  const serverModulePath = context.asAbsolutePath(path.join('server', 'dist', 'serverMain.js'))
+  const languageClient = createLanguageClient(serverModulePath, {});
+  const disposable = languageClient.start()
+  context.subscriptions.push(disposable)
+}
+
+export function createLanguageClient(serverModulePath: string, middleware: Middleware) {
   const debugOptions = { execArgv: ['--nolazy', '--inspect=6006'] }
 
   const serverOptions: ServerOptions = {
-    run: { module: serverModule, transport: TransportKind.ipc },
-    debug: { module: serverModule, transport: TransportKind.ipc, options: debugOptions }
+    run: { module: serverModulePath, transport: TransportKind.ipc },
+    debug: { module: serverModulePath, transport: TransportKind.ipc, options: debugOptions }
   }
 
   const clientOptions: LanguageClientOptions = {
@@ -19,7 +26,5 @@ export function activate(context: ExtensionContext) {
     }
   }
 
-  const client = new LanguageClient('mls', 'Markdown Language Server', serverOptions, clientOptions)
-  const disposable = client.start()
-  context.subscriptions.push(disposable)
+  return new LanguageClient('mls', 'Test Markdown Language Server', serverOptions, clientOptions)
 }
